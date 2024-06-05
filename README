@@ -5,6 +5,10 @@ WHAT IT IS
 
 This is GStreamer, a framework for streaming media.
 
+This repo run on Ubuntu 22.04, it is used for the development 
+
+for Renesas RZ/G2L. 
+
 WHERE TO START
 --------------
 
