@@ -64,7 +64,11 @@ cat .git/refs/heads/RCAR-GEN3e
 
 D. Yocto project
 
-modify the recipes, use the above commit ID
+modify the recipes, use the above commit ID in 
+
+meta-renesas/meta-rz-common/recipes-multimedia/gstreamer/gstreamer1.0-plugins-bad_1.16.3.bbappend
+
+SRCREV = "12f14df8132a98d72ab64ba430870032f56a0600"
 
 bitbake core-image-qt, fetch the package from the repo on Github 
 
