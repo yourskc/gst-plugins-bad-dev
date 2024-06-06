@@ -40,7 +40,8 @@
  * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-// comment below for 1.19.3 or 1.20.3
+// comment below for development 1.19.2
+// uncomment below for renesas RZ/G2L 1.16.3
 // #define GST_RENESAS
 
 #ifndef __GST_EQUIRECTANGULAR_H__
@@ -80,7 +81,7 @@ GType gst_equirectangular_get_type(void);
 // 1.16.3
 gboolean gst_equirectangular_plugin_init(GstPlugin *plugin);
 #else
-// 1.20.3
+// 1.19.2
 GST_ELEMENT_REGISTER_DECLARE(equirectangular);
 #endif
 G_END_DECLS

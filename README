@@ -10,25 +10,93 @@ Evnironment :
 
 Ubuntu 22.04 
 
+Gstremaer Installation :
+
+https://gstreamer.freedesktop.org/documentation/installing/on-linux.html?gi-language=c
+
+
+
+
+git clone this repository. Modify source programs, compile 
+
+
+
+
+
 Work Flow :
+--------------
+
+A. mainmoil_6view 
+
+
+
+B. gst-plugins-bad-dev  
+
+C. gst-plugins-bad   ( forked from Renesas,  )
+
+Check the branch with 
+
+- git branch
+
+the branch should be RCAR-GEN3e/1.16.3
+
+
+Copy 2 source files ( gstequirectangular.c and gstequirectangular.h ) from Step B. to here ( under gst/geometrictransform/ )
+
+ the #define xxx in 
+
+Compile it under Doecker container ( Ubuntu 20.04 )
+
+The environment is not so easy to prepare, since we need to
+
+install other dependency packages. 
+
+But this step can be skiped. 
+
+- ./autogen.sh
+
+- make 
+
+git commit and remember the commit ID, will use it in the next step
+
+D. Yocto project
+
+modify the recipes, use the above commit ID
+
+bitbake core-image-qt, fetch the package from the repo on Github 
+
+Write the result image to SD card
+
+E. Run getreamer pipeline on Renesas RZ/G2L
+
+Copy X, Y map files and mp4 file to target board for testing.
+
+( use scp or wget )  
+
+
+
+Compile :
 --------------
 
 meson build
 
 ninja -C build
 
+( After the successfully compilation, a file named libgstgeometrictransform.so will come up in the folder as below )
+
 sudo cp ./build/gst/geometrictransform/libgstgeometrictransform.so /usr/lib/x86_64-linux-gnu/gstreamer-1.0
 
-
-
-
-. check :
+Check if success:
 
 gst-inspect-1.0 ./build/gst/geometrictransform/libgstgeometrictransform.so
 
-. install :
+Install :
+--------------
 
 sudo cp ./build/gst/geometrictransform/libgstgeometrictransform.so /usr/lib/x86_64-linux-gnu/gstreamer-1.0
+
+Test : 
+--------------
 
 1. 
 gst-launch-1.0 filesrc location=image1920.jpg ! videotestsrc ! equirectangular ! videoconvert ! autovideosink

@@ -76,7 +76,7 @@ G_DEFINE_TYPE(GstEquirectangular, gst_equirectangular,
               GST_TYPE_GEOMETRIC_TRANSFORM);
 
 #ifndef GST_RENESAS
-// 1.20.3
+// 1.19.2
 GST_ELEMENT_REGISTER_DEFINE_WITH_CODE(
     equirectangular, "equirectangular", GST_RANK_NONE, GST_TYPE_EQUIRECTANGULAR,
     GST_DEBUG_CATEGORY_INIT(gst_equirectangular_debug, "equirectangular", 0,
