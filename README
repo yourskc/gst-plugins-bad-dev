@@ -43,7 +43,8 @@ the branch should be RCAR-GEN3e/1.16.3
 
 Copy 2 source files ( gstequirectangular.c and gstequirectangular.h ) from Step B. to here ( under gst/geometrictransform/ )
 
- the #define xxx in 
+uncomment the line below in the beginning of gstequirectangular.h
+// #define GST_RENESAS
 
 Compile it under Doecker container ( Ubuntu 20.04 )
 
@@ -58,6 +59,8 @@ But this step can be skiped.
 - make 
 
 git commit and remember the commit ID, will use it in the next step
+
+cat .git/refs/heads/RCAR-GEN3e
 
 D. Yocto project
 
