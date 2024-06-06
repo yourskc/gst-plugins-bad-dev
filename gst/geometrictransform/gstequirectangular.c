@@ -99,35 +99,11 @@ static gboolean equirectangular_map(GstGeometricTransform *gt, gint x, gint y,
     gdouble width = gt->width;
     gdouble height = gt->height;
 
-    /* normalize in ((-1.0, -1.0), (1.0, 1.0) */
-    norm_x = 2.0 * x / width - 1.0;
-    norm_y = 2.0 * y / height - 1.0;
+    float *p_x = buf_x + ((y - 1) * (int)width + x);
+    float *p_y = buf_y + ((y - 1) * (int)width + x);
 
-    /* normalize radius to 1, simplifies following formula */
-    r = sqrt((norm_x * norm_x + norm_y * norm_y) / 2.0);
-
-    /* the idea is roughly to map r to tan(r) */
-    /* to avoid switching back and forth to polar coordinates use
-       tangent expansion */
-    /*   r = a*r + br^3 + cr^5 + dr^7 + o(8)) */
-    /*     = r(a + br^2 + cr^4 + dr^6) */
-    /* so we can just multiply both x and y by the quantity in parenthesis */
-    /* forgetting about the tangent thing and simplifying things a
-       little bit we have a first linear term that, inverted, gives
-       the zoom amount in the center region (3x here), than a high
-       power term that makes the function blow up at the edges and a
-       quadratic term smooths the middle region */
-    /* coefficients must sum up to 1 to keep vertices in the +-1
-       square */
-    /* obviously this is a poor and arbitrary implementation of a
-       equirectangular filter, if you have a more rigorous method or one
-       that gives better results please step up */
-    norm_x *= (0.33 + 0.1 * r * r + 0.57 * pow(r, 6.0));
-    norm_y *= (0.33 + 0.1 * r * r + 0.57 * pow(r, 6.0));
-
-    /* unnormalize */
-    *in_x = 0.5 * (norm_x + 1.0) * width;
-    *in_y = 0.5 * (norm_y + 1.0) * height;
+    *in_x = (gdouble)*p_x;
+    *in_y = (gdouble)*p_y;
 
     GST_DEBUG_OBJECT(equirectangular, "Inversely mapped %d %d into %lf %lf", x,
                      y, *in_x, *in_y);
@@ -149,15 +125,31 @@ static void gst_equirectangular_class_init(GstEquirectangularClass *klass) {
 
     gstgt_class->map_func = equirectangular_map;
 
-    fptr_x = fopen("map_x", "rb");
-    fptr_y = fopen("map_y", "rb");
+    fptr_x = fopen("EquimatX", "rb");
+    fptr_y = fopen("EquimatY", "rb");
     if ((fptr_x != NULL) && (fptr_y != NULL)) {
-        int Buf_Size = 1920 * 1080 + 1;
+        int Buf_Size = 1920 * 1080;
         buf_x = malloc(sizeof(float) * Buf_Size);
         buf_y = malloc(sizeof(float) * Buf_Size);
+        int rows, cols, type, channels;
+        fread(&rows, 1, sizeof(int), fptr_x);
+        fread(&cols, 1, sizeof(int), fptr_x);
+        fread(&type, 1, sizeof(int), fptr_x);
+        fread(&channels, 1, sizeof(int), fptr_x);
         fread(buf_x, Buf_Size, sizeof(float), fptr_x);
+        fread(&rows, 1, sizeof(int), fptr_y);
+        fread(&cols, 1, sizeof(int), fptr_y);
+        fread(&type, 1, sizeof(int), fptr_y);
+        fread(&channels, 1, sizeof(int), fptr_y);
         fread(buf_y, Buf_Size, sizeof(float), fptr_y);
+        fprintf(stdout, "( rows, cols ) = ( %d, %d ) \n", rows, cols);
+        fprintf(stdout, "X, Y Mats Loaded! \n");
     } else {
+        if (errno != 0)
+            fprintf(stderr, "Could not open mat file, for this reason: %s\n!",
+                    strerror(errno));
+        else
+            fprintf(stderr, "Unknown errors.\n");
     }
 }
 
