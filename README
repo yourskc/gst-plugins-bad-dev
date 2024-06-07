@@ -68,6 +68,8 @@ modify the recipes, use the above commit ID in
 
 meta-renesas/meta-rz-common/recipes-multimedia/gstreamer/gstreamer1.0-plugins-bad_1.16.3.bbappend
 
+example commit ID is as below,
+
 SRCREV = "12f14df8132a98d72ab64ba430870032f56a0600"
 
 bitbake core-image-qt, fetch the package from the repo on Github 
@@ -78,9 +80,15 @@ E. Run getreamer pipeline on Renesas RZ/G2L
 
 Copy X, Y map files and mp4 file to target board for testing.
 
-( use scp or wget )  
+Transfer to the target board using scp or wget   
 
+for example, run the command on the Renesas RZ/G2L
 
+scp skc@192.168.0.105:/home/skc/gst-moil/endo01.mp4 . 
+
+modify run.sh to match the actual .mp4 file location
+
+- run.sh
 
 Compile :
 --------------
@@ -132,7 +140,19 @@ cd test_env
 
 gst-launch-1.0 playbin uri=file:///home/skc/gst-work/gst-plugins-bad-dev/test_env/endo01.mp4 video-sink="videoconvert ! equirectangular ! videoconvert ! autovideosink"
 
+gst-launch-1.0 firesrc location=endo.mp4 ! decodebin ! videorate ! "video/x-raw,framerate=5/1" ! autovideosink
+
+gst-launch-1.0 firesrc location=endo.mp4 ! decodebin ! videorate rate=0.1 ! autovideosink
 
 
+5. rtsp streaming 
 
+on PC 
 
+sender
+
+gst-launch-1.0 -e filesrc location=./endo01.mp4 ! qtdemux ! queue ! h264parse ! rtph264pay config-interval=10 ! udpsink host=192.168.0.105 port=5000 -v
+
+receiver
+
+gst-launch-1.0 udpsrc port=5000 ! "application/x-rtp, media=video, clock-rate=90000, encoding-name=H264, payloca=96" ! rtph264depay ! decodebin ! autovideosink
