@@ -114,13 +114,16 @@ Test :
 --------------
 
 1. 
-gst-launch-1.0 filesrc location=image1920.jpg ! videotestsrc ! equirectangular ! videoconvert ! autovideosink
+gst-launch-1.0 filesrc location=endo01.jpg ! videotestsrc ! equirectangular ! videoconvert ! autovideosink
 
 2. image file ( still checking )
 cd test_env
 
-gst-launch-1.0 filesrc location=image1920.jpg ! jpegdec ! imagefreeze ! equirectangular ! videoconvert ! autovideosink
-
+gst-launch-1.0 filesrc location=endo01.jpg ! jpegdec ! imagefreeze ! autovideosink
+( X )
+gst-launch-1.0 filesrc location=endo01.jpg ! jpegdec ! imagefreeze ! equirectangular ! videoconvert ! autovideosink
+( X )
+gst-launch-1.0 filesrc location=endo01.jpg ! jpegdec ! imagefreeze ! videoconvert ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v
 3. usb camera
 
 gst-launch-1.0 v4l2src ! equirectangular ! videoconvert ! autovideosink
@@ -140,19 +143,39 @@ cd test_env
 
 gst-launch-1.0 playbin uri=file:///home/skc/gst-work/gst-plugins-bad-dev/test_env/endo01.mp4 video-sink="videoconvert ! equirectangular ! videoconvert ! autovideosink"
 
-gst-launch-1.0 firesrc location=endo.mp4 ! decodebin ! videorate ! "video/x-raw,framerate=5/1" ! autovideosink
+gst-launch-1.0 firesrc location=endo01.mp4 ! decodebin ! videorate ! "video/x-raw,framerate=5/1" ! autovideosink
 
-gst-launch-1.0 firesrc location=endo.mp4 ! decodebin ! videorate rate=0.1 ! autovideosink
+gst-launch-1.0 firesrc location=endo01.mp4 ! decodebin ! videorate rate=0.1 ! autovideosink
 
+gst-launch-1.0 filesrc location=endo01.mp4 ! qtdemux !queue ! avdec_h264 ! videoconvert ! equirectangular ! videoconvert ! autovideosink
 
 5. rtsp streaming 
 
 on PC 
 
 sender
+( x )
+gst-launch-1.0 -e filesrc location=endo01.mp4 ! qtdemux ! queue ! h264parse ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v   
 
-gst-launch-1.0 -e filesrc location=./endo01.mp4 ! qtdemux ! queue ! h264parse ! rtph264pay config-interval=10 ! udpsink host=192.168.0.105 port=5000 -v
+
+( -e seems can be ignored )
+gst-launch-1.0 filesrc location=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! autovideosink   ( OK )
+gst-launch-1.0 filesrc location=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! videoconvert ! equirectangular ! videoconvert ! autovideosink   ( OK )
+( X )
+gst-launch-1.0 filesrc location=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v
+gst-launch-1.0 filesrc location=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! videoconvert ! equirectangular ! videoconvert ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v
+can run, but can not received by receiver
 
 receiver
 
-gst-launch-1.0 udpsrc port=5000 ! "application/x-rtp, media=video, clock-rate=90000, encoding-name=H264, payloca=96" ! rtph264depay ! decodebin ! autovideosink
+gst-launch-1.0 udpsrc port=5000 ! "application/x-rtp, media=video, clock-rate=90000, encoding-name=H264, payload=96" ! rtph264depay ! decodebin ! autovideosink   ( OK )
+
+
+The bwlow UDP pair commands work fine !!
+
+receiver 
+gst-launch-1.0 -v udpsrc uri=udp://localhost:5000 ! application/x-rtp, media=video, payload=96, encoding-name=H264 ! rtph264depay ! avdec_h264 ! videoconvert ! autovideosink
+
+sender 
+gst-launch-1.0 filesrc localtion=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v
+gst-launch-1.0 filesrc localtion=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! videoconvert ! equirectangular ! videoconvert ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v 
