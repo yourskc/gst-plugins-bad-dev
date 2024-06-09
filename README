@@ -179,3 +179,33 @@ gst-launch-1.0 -v udpsrc uri=udp://localhost:5000 ! application/x-rtp, media=vid
 sender 
 gst-launch-1.0 filesrc localtion=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v
 gst-launch-1.0 filesrc localtion=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! videoconvert ! equirectangular ! videoconvert ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v 
+
+RTSP ref. to
+https://gist.github.com/bmount/6cb201aa1a869bfdc0b3a4be49fa9c26
+
+
+Renesas
+
+Receiver ( PC, Ubuntu 2204 )
+
+sudo gst-launch-1.0 -e udpsrc port=5000 buffer-size=100000000 caps="application/x-rtp" ! queue ! rtph264depay ! h264parse ! decodebin ! videoconvert ! autovideosink
+
+Sender ( Renesas RZ/G2L )
+
+run.sh  transmit
+gst-launch-1.0 -e filesrc location=./endo02.mp4 ! qtdemux ! queue ! \
+h264parse ! video/x-h264, stream-format=avc,alignment=au ! rtph264pay pt=96 name=pay0 \
+config-interval=3 mtu=6000 ! udpsink host=192.168.0.105 port=5000
+
+run2.sh   decode encode transmit
+gst-launch-1.0 -e filesrc location=./endo02.mp4 ! qtdemux ! queue ! \
+h264parse ! omxh264dec ! omxh264enc ! rtph264pay config-interval=10  ! udpsink host=192.168.0.105 port=5000
+
+run3.sh run4.sh  decode transform encode transmit
+gst-launch-1.0 -e filesrc location=./endo02.mp4 ! qtdemux ! queue ! \
+h264parse ! omxh264dec ! videoconvert ! equirectangular ! videoconvert ! omxh264enc ! rtph264pay config-interval=10  ! udpsink host=192.168.0.105 port=5000
+
+run5.sh decode
+gst-launch-1.0 -e filesrc location=./endo02.mp4 ! qtdemux ! queue ! \
+h264parse ! omxh264dec ! videoconvert ! equirectangular ! videoconvert ! autovideosink
+
