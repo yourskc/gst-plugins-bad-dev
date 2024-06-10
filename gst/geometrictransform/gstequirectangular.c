@@ -87,6 +87,8 @@ float *buf_x;
 float *buf_y;
 FILE *fptr_x;
 FILE *fptr_y;
+int mat_width = 0;
+int mat_height = 0;
 static gboolean equirectangular_map(GstGeometricTransform *gt, gint x, gint y,
                                     gdouble *in_x, gdouble *in_y) {
 #ifndef GST_DISABLE_GST_DEBUG
@@ -99,15 +101,17 @@ static gboolean equirectangular_map(GstGeometricTransform *gt, gint x, gint y,
     gdouble width = gt->width;
     gdouble height = gt->height;
 
-    float *p_x = buf_x + ((y - 1) * (int)width + x);
-    float *p_y = buf_y + ((y - 1) * (int)width + x);
+    if ((mat_width > 0) && (width == mat_width) && (mat_height > 0) &&
+        (height == mat_height)) {
+        float *p_x = buf_x + ((y - 1) * (int)width + x);
+        float *p_y = buf_y + ((y - 1) * (int)width + x);
 
-    *in_x = (gdouble)*p_x;
-    *in_y = (gdouble)*p_y;
+        *in_x = (gdouble)*p_x;
+        *in_y = (gdouble)*p_y;
 
-    GST_DEBUG_OBJECT(equirectangular, "Inversely mapped %d %d into %lf %lf", x,
-                     y, *in_x, *in_y);
-
+        GST_DEBUG_OBJECT(equirectangular, "Inversely mapped %d %d into %lf %lf",
+                         x, y, *in_x, *in_y);
+    }
     return TRUE;
 }
 
@@ -132,8 +136,8 @@ static void gst_equirectangular_class_init(GstEquirectangularClass *klass) {
         buf_x = malloc(sizeof(float) * Buf_Size);
         buf_y = malloc(sizeof(float) * Buf_Size);
         int rows, cols, type, channels;
-        fread(&rows, 1, sizeof(int), fptr_x);
-        fread(&cols, 1, sizeof(int), fptr_x);
+        fread(&mat_height, 1, sizeof(int), fptr_x);
+        fread(&mat_width, 1, sizeof(int), fptr_x);
         fread(&type, 1, sizeof(int), fptr_x);
         fread(&channels, 1, sizeof(int), fptr_x);
         fread(buf_x, Buf_Size, sizeof(float), fptr_x);
@@ -142,6 +146,7 @@ static void gst_equirectangular_class_init(GstEquirectangularClass *klass) {
         fread(&type, 1, sizeof(int), fptr_y);
         fread(&channels, 1, sizeof(int), fptr_y);
         fread(buf_y, Buf_Size, sizeof(float), fptr_y);
+        if (( mat_height == rows ) && ( )
         fprintf(stdout, "( rows, cols ) = ( %d, %d ) \n", rows, cols);
         fprintf(stdout, "X, Y Mats Loaded! \n");
     } else {
