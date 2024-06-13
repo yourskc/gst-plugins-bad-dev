@@ -155,7 +155,7 @@ gst-launch-1.0 filesrc location=endo01.mp4 ! qtdemux !queue ! avdec_h264 ! video
 
 5. udp/ rtsp streaming 
 
-jpeg pair OK
+PC jpeg streaming OK
 receiver ( receive h264, all the same ) 
 gst-launch-1.0 -v udpsrc uri=udp://localhost:5000 ! application/x-rtp, media=video, payload=96, encoding-name=H264 ! rtph264depay ! avdec_h264 ! videoconvert ! autovideosink
 
@@ -164,14 +164,14 @@ gst-launch-1.0 filesrc location=image1920.jpg ! decodebin ! imagefreeze ! videos
 
 gst-launch-1.0 videotestsrc ! video/x-raw, width=1920, height=1080 ! videoconvert  ! equirectangular ! videoconvert ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000
 
+gst-launch-1.0 v4l2src device=/dev/video0 ! videoscale ! video/x-raw, width=1920, height=1080 ! videoconvert  ! equirectangular ! videoconvert ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000
 
 
 
 
 
 
-
-on PC 
+PC 
 
 sender
 ( x )
@@ -190,15 +190,15 @@ receiver
 
 gst-launch-1.0 udpsrc port=5000 ! "application/x-rtp, media=video, clock-rate=90000, encoding-name=H264, payload=96" ! rtph264depay ! decodebin ! autovideosink   ( OK )
 
-
+PC mp4 + equirectangular
 The bwlow UDP pair commands work fine for PC/udp !!
 
 receiver 
 gst-launch-1.0 -v udpsrc uri=udp://localhost:5000 ! application/x-rtp, media=video, payload=96, encoding-name=H264 ! rtph264depay ! avdec_h264 ! videoconvert ! autovideosink
 
 sender 
-gst-launch-1.0 filesrc localtion=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v
-gst-launch-1.0 filesrc localtion=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! videoconvert ! equirectangular ! videoconvert ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v 
+gst-launch-1.0 filesrc location=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v
+gst-launch-1.0 filesrc location=endo01.mp4 ! qtdemux ! queue ! avdec_h264 ! videoconvert ! equirectangular ! videoconvert ! x264enc ! rtph264pay config-interval=10 ! udpsink host=localhost port=5000 -v 
 
 RTSP ref. to
 https://gist.github.com/bmount/6cb201aa1a869bfdc0b3a4be49fa9c26
