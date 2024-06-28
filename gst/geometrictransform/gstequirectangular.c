@@ -83,7 +83,7 @@ GST_ELEMENT_REGISTER_DEFINE_WITH_CODE(
                             "equirectangular"));
 #endif
 
-#define BUF_SZ = 1920 * 1080;
+#define BUF_SZ 1920*1080;
 float *buf_x;
 float *buf_y;
 FILE *fptr_x;
@@ -118,6 +118,7 @@ static gboolean equirectangular_map(GstGeometricTransform *gt, gint x, gint y,
 }
 
 static void gst_equirectangular_class_init(GstEquirectangularClass *klass) {
+   
     GstElementClass *gstelement_class;
     GstGeometricTransformClass *gstgt_class;
 
@@ -133,6 +134,7 @@ static void gst_equirectangular_class_init(GstEquirectangularClass *klass) {
 
     fptr_x = fopen("EquimatX", "rb");
     fptr_y = fopen("EquimatY", "rb");
+   
     if ((fptr_x != NULL) && (fptr_y != NULL)) {
         int Buf_Size = BUF_SZ;
         buf_x = malloc(sizeof(float) * Buf_Size);
@@ -148,7 +150,8 @@ static void gst_equirectangular_class_init(GstEquirectangularClass *klass) {
         fread(&type, 1, sizeof(int), fptr_y);
         fread(&channels, 1, sizeof(int), fptr_y);
         fread(buf_y, Buf_Size, sizeof(float), fptr_y);
-        if (( mat_height == rows ) && (( mat_width == cols ) )){
+        
+        if (( mat_height == rows ) && ( mat_width == cols )){
         fprintf(stdout, "( rows, cols ) = ( %d, %d ) \n", rows, cols);
         fprintf(stdout, "X, Y Mats Loaded! \n");
     } else {
@@ -157,7 +160,8 @@ static void gst_equirectangular_class_init(GstEquirectangularClass *klass) {
                     strerror(errno));
         else
             fprintf(stderr, "Unknown errors.\n");
-    }
+    }    
+}
 }
 
 static void gst_equirectangular_init(GstEquirectangular *filter) {
