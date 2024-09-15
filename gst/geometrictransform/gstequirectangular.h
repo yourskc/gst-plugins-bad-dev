@@ -46,7 +46,8 @@
 
 #ifndef __GST_EQUIRECTANGULAR_H__
 #define __GST_EQUIRECTANGULAR_H__
-
+#include <stdio.h>
+#include <stdlib.h>
 #include "geometricmath.h"
 #include "gstgeometrictransform.h"
 #include <gst/gst.h>
@@ -68,8 +69,15 @@ G_BEGIN_DECLS
 typedef struct _GstEquirectangular GstEquirectangular;
 typedef struct _GstEquirectangularClass GstEquirectangularClass;
 
+#define BUF_SZ 1920*1080
 struct _GstEquirectangular {
     GstGeometricTransform element;
+float *buf_x;
+float *buf_y;
+FILE *fptr_x;
+FILE *fptr_y;
+int mat_width;
+int mat_height;    
 };
 
 struct _GstEquirectangularClass {
@@ -85,4 +93,7 @@ gboolean gst_equirectangular_plugin_init(GstPlugin *plugin);
 GST_ELEMENT_REGISTER_DECLARE(equirectangular);
 #endif
 G_END_DECLS
+
+static void gst_equirectangular_finalize (GObject * obj);
+static gboolean equirectangular_prepare(GstGeometricTransform * trans);
 #endif /* __GST_EQUIRECTANGULAR_H__ */
