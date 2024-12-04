@@ -13,6 +13,21 @@ the formal version used to be compiled in the Yocto project for
 
 Renesas RX/G2L.
 
+Prerequisites
+--------------
+
+- Install OpenCV
+```
+sudo apt install libopencv-dev python3-opencv
+```
+- Install libmoildev.so
+
+https://github.com/yourskc/moildev_install
+
+- Install opencv plugin for GStreamer
+```
+sudo apt install gstreamer1.0-opencv
+```
 
 
 Original Readme : 
